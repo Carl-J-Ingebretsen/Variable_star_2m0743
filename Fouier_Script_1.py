@@ -4,6 +4,7 @@ for ASTR 302 in april of 2021. Authors: Aiden Nakleh, Carl Ingebretsen, Cyrus Wo
 import numpy as np 
 from scipy.fft import fft, fftfreq
 from scipy.interpolate import interp1d 
+from scipy.optimize import curve_fit
 from scipy.signal import find_peaks
 import matplotlib.pyplot as plt 
 import pandas as pd 
@@ -15,7 +16,14 @@ def main():
     no_baseline_data, time = subtract_a_polynomial(star_data)
     intr_data, new_time = interpolate_data(no_baseline_data, time)
     transformed_data, xf = fourier_analyze_data(intr_data, new_time)
-    find_data_peaks(transformed_data, xf)
+    peaks = find_data_peaks(transformed_data, xf)
+    #t_1=transformed_data[peaks[0]-3:peaks[0]+3]
+    #xf_1=xf[peaks[0]-3:peaks[0]+3]
+    #param, cov = fit_the_model(xf_1, t_1)
+    #print(param, cov)
+    #plt.plot(xf, transformed_data)
+    #plt.plot(xf, guassian_model(xf, param[0], param[1]))
+    #plt.show()
 
 def import_star_data():
     '''import the data'''
@@ -24,7 +32,7 @@ def import_star_data():
     data=pd.DataFrame(data, columns=['J.D.-2400000','rel_flux_T1'])#Be sure of which columns.
     #One time column and one flux column.
     data=data.to_numpy()
-    print(data)
+    #print(data)
     return data
 
 def subtract_a_polynomial(data):
@@ -35,7 +43,7 @@ def subtract_a_polynomial(data):
         time.append(point[0])
         flux.append(point[1])
     curve=np.polyfit(time,flux,deg=2)
-    print(time)
+    #print(time)
 
     a = curve[0]
     b = curve[1]
@@ -47,8 +55,8 @@ def subtract_a_polynomial(data):
         polynomial_values.append(num)
         fitted_flux.append(flux[i]-num)
        
-    print(flux)
-    print(fitted_flux)
+    #print(flux)
+    #print(fitted_flux)
     plt.plot(time,fitted_flux)
     plt.xlabel('JD-2400000')
     plt.ylabel('relative flux')
@@ -64,10 +72,10 @@ def interpolate_data(flux_data, time):
     '''perform an interpolation'''
     new_time = np.linspace(time[0], time[-1], num=933, endpoint=True)
     interpolated_flux = interp1d(new_time, flux_data, kind='cubic')
-    print(interpolated_flux)
+    #print(interpolated_flux)
     #Plot of the new data.
-    plt.plot(new_time, interpolated_flux(new_time), marker = '.', linestyle='solid', color = 'blue', markersize = 0.5)
-    plt.show()
+    #plt.plot(new_time, interpolated_flux(new_time), marker = '.', linestyle='solid', color = 'blue', markersize = 0.5)
+    #plt.show()
     return interpolated_flux, new_time
 
 def fourier_analyze_data(flux_data, time):
@@ -83,12 +91,12 @@ def fourier_analyze_data(flux_data, time):
 def find_data_peaks(flux_data, frequencies):
     '''Find the peaks at wich there is power in the fourier transform.'''
     peaks, peak_data = find_peaks(x=flux_data, threshold=0.05)
-    print(peaks)
+    #print(peaks)
     for i in peaks:
         print('a frequency of pulsation is', frequencies[i])
         print('the corresponding period in seconds is', (1/frequencies[i]))
         
-    #print(peak_data['peak_heights'])
+    return peaks
 
 def save_data_to_file():
     '''save the necessary data.'''
@@ -113,5 +121,14 @@ def display_graph_2(data):
     plt.xlabel('JD-2400000')
     plt.ylabel('relative flux')
     plt.show()
+
+def guassian_model(x, sigma, mu):
+    '''Make a guassian function to use as a model.'''
+    return (1/(sigma*(2*np.pi)**0.5))*np.exp(-0.5*(x-mu/sigma)**2)
+
+def fit_the_model(xx, yy):
+    '''try to fit the model to get central frequency and to get an uncertainty.'''
+    param, covarients = curve_fit(guassian_model, xx, yy, method='lm')
+    return param, covarients
 
 main()
