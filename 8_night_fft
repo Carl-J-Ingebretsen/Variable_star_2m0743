@@ -1,0 +1,57 @@
+# -*- coding: utf-8 -*-
+# Created on Sun Apr 18 14:39:27 2021
+# Cyrus Worley
+'''code for 8 night data'''
+
+import pandas as pd
+import numpy as np
+from scipy.fft import fft, fftfreq
+from scipy.signal import find_peaks
+import matplotlib.pyplot as plt
+
+def main():
+    time, flux = import_star_data()
+    # display_graph(time, flux)
+    transform_data, xf = fourier_analyze_data(time, flux)
+    #find_data_peaks(transform_data, xf)
+
+def import_star_data():
+    '''import the data'''
+    file_name=input("enter a file name: ")
+    #file_name = '2m0753.12feb-21mar2021.csv'
+    data=pd.read_csv(file_name)
+    data=pd.DataFrame(data, columns=['J.D.-2459200','rel_flux_T1'])#Be sure of which columns.
+    #One time column and one flux column.
+    data=data.to_numpy()
+    
+    time, flux = np.array([]), np.array([])
+    for i in range(len(data)):
+        time = np.append(time, data[i,0])
+        flux = np.append(flux, data[i,1])
+    return time, flux
+
+def fourier_analyze_data(time, flux_data):
+    '''Fourier analyze the data'''
+    transform_data = fft(flux_data)
+    transform_data = abs(transform_data)
+    xf = fftfreq(time.shape[0], 28.957)
+    plt.plot(xf, transform_data, marker='o')
+    plt.show()
+    return transform_data ,xf
+
+def find_data_peaks(flux_data, frequencies):
+    '''Find the peaks at wich there is power in the fourier transform.'''
+    peaks, peak_data = find_peaks(x=flux_data, threshold=0.05)
+    print(peaks)
+    for i in peaks:
+        print('a frequency of pulsation is', frequencies[i])
+        print('the corresponding period in seconds is', (1/frequencies[i]))
+
+def display_graph(time, flux_data):
+    '''display a graph of a light curve.'''
+    plt.plot(time, flux_data, marker = '.', linestyle='solid', color = 'blue', markersize = 0.5)
+    plt.xlabel('JD-2459200')
+    plt.ylabel('relative flux')
+    plt.show()
+
+main()
