@@ -11,12 +11,12 @@ import pandas as pd
 
 def main():
     '''main function'''
-    star_data = import_star_data()
-    display_graph(star_data)
-    no_baseline_data, time = subtract_a_polynomial(star_data)
-    intr_data, new_time = interpolate_data(no_baseline_data, time)
-    transformed_data, xf = fourier_analyze_data(intr_data, new_time)
-    peaks = find_data_peaks(transformed_data, xf)
+    star_data = import_star_data() #import the data from a csv file
+    display_graph(star_data) #Display the light curve
+    no_baseline_data, time = subtract_a_polynomial(star_data) #Subtract a baseline off the data
+    intr_data, new_time = interpolate_data(no_baseline_data, time)#Interpolate the data
+    transformed_data, xf = fourier_analyze_data(intr_data, new_time)#Do the fourier transform
+    peaks = find_data_peaks(transformed_data, xf) #Find the maximums of the peaks
     #characterize_peaks(peaks,transformed_data,xf)
     test_fit_curve(peaks,transformed_data,xf)
 
@@ -56,10 +56,6 @@ def subtract_a_polynomial(data):
     plt.xlabel('JD-2400000')
     plt.ylabel('relative flux')
     plt.show()
-    #maybe don't need this step.
-    '''new_data=[]
-    new_data.append(time)
-    new_data.append(fitted_flux)'''
     return fitted_flux, time
 
 
@@ -144,12 +140,12 @@ def characterize_peaks(peaks,flux_data,frequencies):
 def test_fit_curve(peaks, flux_data, frequencies):
     '''test function'''
     print(peaks[5])
-    flux_1=flux_data[743:750]
-    freq_1=frequencies[743:750]
+    flux_1=flux_data[742:750]
+    freq_1=frequencies[742:750]
     param, cov = fit_the_model(freq_1, flux_1)
     print(param, cov)
-    plt.plot(frequencies, flux_data)
-    plt.plot(freq_1, guassian_model(freq_1, param[0], param[1]))
+    #plt.plot(frequencies, flux_data)
+    plt.plot(freq_1, gaussian(freq_1, param[0], param[1], param[2]))
     plt.show()
 
 def gaussian(x,amp,cen,wid):
