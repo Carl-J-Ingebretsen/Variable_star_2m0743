@@ -17,13 +17,7 @@ def main():
     intr_data, new_time = interpolate_data(no_baseline_data, time)
     transformed_data, xf = fourier_analyze_data(intr_data, new_time)
     peaks = find_data_peaks(transformed_data, xf)
-    #t_1=transformed_data[peaks[0]-3:peaks[0]+3]
-    #xf_1=xf[peaks[0]-3:peaks[0]+3]
-    #param, cov = fit_the_model(xf_1, t_1)
-    #print(param, cov)
-    #plt.plot(xf, transformed_data)
-    #plt.plot(xf, guassian_model(xf, param[0], param[1]))
-    #plt.show()
+    characterize_peaks(peaks,transformed_data,xf)
 
 def import_star_data():
     '''import the data'''
@@ -90,7 +84,7 @@ def fourier_analyze_data(flux_data, time):
 
 def find_data_peaks(flux_data, frequencies):
     '''Find the peaks at wich there is power in the fourier transform.'''
-    peaks, peak_data = find_peaks(x=flux_data, threshold=0.05)
+    peaks, peak_data = find_peaks(x=flux_data, threshold=0.04)#Check threshold to get all 5 peaks. 4 peaks at 0.05.
     #print(peaks)
     for i in peaks:
         print('a frequency of pulsation is', frequencies[i])
@@ -130,5 +124,18 @@ def fit_the_model(xx, yy):
     '''try to fit the model to get central frequency and to get an uncertainty.'''
     param, covarients = curve_fit(guassian_model, xx, yy, method='lm')
     return param, covarients
+
+def characterize_peaks(peaks,flux_data,frequencies):
+    '''Slice and fit the peaks.'''
+    peaks=peaks[3:]
+    for i in peaks:
+        print(peaks)
+        t_1=flux_data[flux_data[peaks[i]-3]:flux_data[peaks[i]+3]]
+        xf_1=xf[frequencies[peaks[i]-3]:frequencies[peaks[i]+3]]
+        param, cov = fit_the_model(xf_1, t_1)
+        print(param, cov)
+        plt.plot(xf, transformed_data)
+        plt.plot(xf_1, guassian_model(xf_1, param[0], param[1]))
+        plt.show()
 
 main()
