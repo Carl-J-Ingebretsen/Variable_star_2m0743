@@ -113,9 +113,9 @@ def display_graph_2(data):
     plt.ylabel('relative flux')
     plt.show()
 
-def guassian_model(x, sigma, mu):
-    '''Make a guassian function to use as a model.'''
-    return (1/(sigma*(2*np.pi)**0.5))*np.exp(-0.5*(x-mu/sigma)**2)
+#def guassian_model(x, sigma, mu):
+    #'''Make a guassian function to use as a model.'''
+    #return (1/(sigma*(2*np.pi)**0.5))*np.exp(-0.5*(x-mu/sigma)**2)
 
 def fit_the_model(xx, yy):
     '''try to fit the model to get central frequency and to get an uncertainty.'''
