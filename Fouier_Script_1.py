@@ -17,7 +17,8 @@ def main():
     intr_data, new_time = interpolate_data(no_baseline_data, time)
     transformed_data, xf = fourier_analyze_data(intr_data, new_time)
     peaks = find_data_peaks(transformed_data, xf)
-    characterize_peaks(peaks,transformed_data,xf)
+    #characterize_peaks(peaks,transformed_data,xf)
+    test_fit_curve(peaks,transformed_data,xf)
 
 def import_star_data():
     '''import the data'''
@@ -122,20 +123,38 @@ def guassian_model(x, sigma, mu):
 
 def fit_the_model(xx, yy):
     '''try to fit the model to get central frequency and to get an uncertainty.'''
-    param, covarients = curve_fit(guassian_model, xx, yy, method='lm')
+    param, covarients = curve_fit(gaussian, xx, yy, method='lm')
+    print(param)
     return param, covarients
 
 def characterize_peaks(peaks,flux_data,frequencies):
     '''Slice and fit the peaks.'''
     peaks=peaks[3:]
     for i in peaks:
-        print(peaks)
-        t_1=flux_data[flux_data[peaks[i]-3]:flux_data[peaks[i]+3]]
-        xf_1=xf[frequencies[peaks[i]-3]:frequencies[peaks[i]+3]]
+        print(i)
+        
+        t_1=flux_data[flux_data[(i-3)]:flux_data[(i+3)]]
+        xf_1=xf[frequencies[(i-3)]:frequencies[(i+3)]]
         param, cov = fit_the_model(xf_1, t_1)
         print(param, cov)
-        plt.plot(xf, transformed_data)
+        plt.plot(frequencies, flux_data)
         plt.plot(xf_1, guassian_model(xf_1, param[0], param[1]))
         plt.show()
+
+def test_fit_curve(peaks, flux_data, frequencies):
+    '''test function'''
+    print(peaks[5])
+    flux_1=flux_data[743:750]
+    freq_1=frequencies[743:750]
+    param, cov = fit_the_model(freq_1, flux_1)
+    print(param, cov)
+    plt.plot(frequencies, flux_data)
+    plt.plot(freq_1, guassian_model(freq_1, param[0], param[1]))
+    plt.show()
+
+def gaussian(x,amp,cen,wid):
+    return amp * np.exp(-(x-cen)**2 / wid)
+
+
 
 main()
